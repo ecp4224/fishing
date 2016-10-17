@@ -1,5 +1,6 @@
 package com.boxtrotstudio.fishing;
 
+import com.boxtrotstudio.fishing.handlers.GameHandler;
 import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.uikit.UIApplication;
 
@@ -11,7 +12,10 @@ public class IOSLauncher extends IOSApplication.Delegate {
     @Override
     protected IOSApplication createApplication() {
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
-        return new IOSApplication(new Fishing(), config);
+
+        Fishing.setDefaultHandler(new GameHandler());
+
+        return new IOSApplication(Fishing.getInstance(), config);
     }
 
     public static void main(String[] argv) {

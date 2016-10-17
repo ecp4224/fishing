@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:2.0.0'
         classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.2.0'
         classpath 'org.multi-os-engine:moe-gradle:1.2.2'
     }
@@ -85,20 +85,7 @@ project(":core") {
         compile "com.kotcrab.vis:vis-ui:1.1.1"
         compile "net.dermetfan.libgdx-utils:libgdx-utils:0.13.3"
         compile "de.tomgrill.gdxdialogs:gdx-dialogs-core:1.1.0"
-    }
-}
-
-project(":ios-moe") {
-    apply plugin: "moe"
-
-    configurations { natives }
-
-    dependencies {
-        compile project(":core")
-        compile "com.badlogicgames.gdx:gdx-backend-moe:$gdxVersion"
-        natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-ios"
-        natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-ios"
-        compile "de.tomgrill.gdxdialogs:gdx-dialogs-ios-moe:1.1.0"
+        compile 'com.google.code.gson:gson:2.3'
     }
 }
 

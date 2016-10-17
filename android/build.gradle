@@ -16,7 +16,7 @@ android {
     }
     defaultConfig {
         applicationId "com.boxtrotstudio.fishing"
-        minSdkVersion 8
+        minSdkVersion 15
         targetSdkVersion 20
     }
 }

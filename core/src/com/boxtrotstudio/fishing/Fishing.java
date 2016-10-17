@@ -108,5 +108,11 @@ public class Fishing {
 
         @Override
         public void tick() { }
+
+        @Override
+        public void resume() { }
+
+        @Override
+        public void pause() { }
     }
 }

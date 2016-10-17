@@ -4,4 +4,8 @@ public interface Handler {
     void start();
 
     void tick();
+
+    void resume();
+
+    void pause();
 }

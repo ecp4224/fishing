@@ -28,15 +28,15 @@ class FishingClient(var handler: Handler) : ApplicationListener {
     private val logicalHandler = LogicHandler()
     private val scenes = ArrayList<Scene>()
     private val bodies = ArrayList<Body>()
-    private lateinit  var fpsText: Text
     lateinit var world: World
+    public var backColor = Color(0f, 0f, 0f, 1f)
 
     override fun pause() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        handler.pause()
     }
 
     override fun resume() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        handler.resume()
     }
 
     override fun create() {
@@ -53,12 +53,6 @@ class FishingClient(var handler: Handler) : ApplicationListener {
 
         val widthMult = Gdx.graphics.width / 1280f
         val heightMult = Gdx.graphics.height / 720f
-
-        fpsText = Text(16, Color.WHITE, Gdx.files.internal("fonts/INFO56_0.ttf"))
-        fpsText.x = 40f * widthMult
-        fpsText.y = 20f * heightMult
-        fpsText.text = "FPS: 0"
-        fpsText.load()
     }
 
     public fun createBody(bodyDef: BodyDef) : Body {
@@ -88,7 +82,7 @@ class FishingClient(var handler: Handler) : ApplicationListener {
     }
 
     fun _render() {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+        Gdx.gl.glClearColor(backColor.r, backColor.g, backColor.b, backColor.a)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         logicalHandler.tick(handler, world)
@@ -102,17 +96,6 @@ class FishingClient(var handler: Handler) : ApplicationListener {
                 scene.render(camera, batch)
             }
         }
-        renderText()
-    }
-
-    fun renderText() {
-        batch.begin()
-
-
-        fpsText.text = "FPS: " + Gdx.graphics.framesPerSecond
-        fpsText.draw(batch)
-
-        batch.end()
     }
 
     public fun addScene(scene: Scene) {
@@ -149,6 +132,8 @@ class FishingClient(var handler: Handler) : ApplicationListener {
                 removeScene(scene)
             }
             logicalHandler.clear()
+
+            backColor = Color(0f, 0f, 0f, 1f)
         }
     }
 

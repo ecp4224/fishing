@@ -10,8 +10,12 @@ import com.boxtrotstudio.fishing.Fishing
 import com.boxtrotstudio.fishing.core.game.Entity
 import com.boxtrotstudio.fishing.core.render.Text
 import com.boxtrotstudio.fishing.core.render.scene.AbstractScene
+import com.boxtrotstudio.fishing.handlers.GameHandler
+import com.boxtrotstudio.fishing.utils.AsyncTask
+import com.boxtrotstudio.fishing.utils.CancelToken
+import com.boxtrotstudio.fishing.utils.Future
 
-public class LoadingScene : AbstractScene() {
+public class LoadingScene(val handler: GameHandler) : AbstractScene() {
     private lateinit var progressBarFront : Sprite
     private lateinit var logo: Sprite
     private var startTime = 0L
@@ -40,7 +44,7 @@ public class LoadingScene : AbstractScene() {
     }
 
     override fun render(camera: OrthographicCamera, batch: SpriteBatch) {
-        if (Fishing.ASSETS.update() && !didCall) {
+        if (finishedLoading() && !didCall) {
             stage2 = 1
             startTime = System.currentTimeMillis()
             didCall = true
@@ -73,6 +77,20 @@ public class LoadingScene : AbstractScene() {
 
     override fun dispose() {
 
+    }
+
+    var task : Future<Boolean>? = null
+    fun finishedLoading() : Boolean {
+        if (Fishing.ASSETS.update()) {
+            if (task == null) {
+                task = AsyncTask.runTask {
+                    handler.loadSaveState()
+                }
+            } else if ((task as Future<Boolean>).isFinished) {
+                return true
+            }
+        }
+        return false
     }
 
     public fun setLoadedCallback(callback: Runnable) {

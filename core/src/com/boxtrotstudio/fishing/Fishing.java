@@ -4,11 +4,14 @@ import box2dLight.RayHandler;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.boxtrotstudio.fishing.core.game.fishing.Fish;
+import com.boxtrotstudio.fishing.core.game.fishing.FishFactory;
 import com.boxtrotstudio.fishing.core.logic.Handler;
 import com.boxtrotstudio.fishing.handlers.GameHandler;
 import com.boxtrotstudio.fishing.utils.ArrayHelper;
@@ -36,6 +39,8 @@ public class Fishing {
     public static void loadGameAssets(AssetManager manager) {
         if (loaded)
             return;
+
+        ASSETS.setLoader(Fish.class, new FishFactory(new InternalFileHandleResolver()));
 
         //Load all sprites
         FileHandle[] sprites = Gdx.files.internal("sprites").list(new FileFilter() {
@@ -70,12 +75,24 @@ public class Fishing {
             }
         });
 
+        FileHandle[] fish_files = Gdx.files.internal("fish").list(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.getName().endsWith("fish") ||
+                        pathname.getName().endsWith("json");
+            }
+        });
+
         for (FileHandle file: ArrayHelper.combine(sprites, menuSprites)) {
             manager.load(file.path(), Texture.class);
         }
 
         for (FileHandle file: map_files) {
             manager.load(file.path(), Texture.class);
+        }
+
+        for (FileHandle file: fish_files) {
+            manager.load(file.path(), Fish.class);
         }
 
         FileHandle[] sounds = Gdx.files.internal("sounds").list(new FileFilter() {
@@ -90,9 +107,6 @@ public class Fishing {
         for (FileHandle file: sounds) {
             manager.load(file.path(), Sound.class);
         }
-
-
-        //TODO Load other shit
 
         loaded = true;
     }

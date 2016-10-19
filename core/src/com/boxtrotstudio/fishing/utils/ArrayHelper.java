@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A utility class for doing basic things with arrays
@@ -28,6 +29,16 @@ public class ArrayHelper {
                 throw new IllegalStateException(failedMessage, t);
             }
         }
+    }
+
+    public static <T> List<T> filter(List<T> list, PFunction<T, Boolean> condition) {
+        ArrayList<T> toReturn = new ArrayList<>();
+        for (T item : list) {
+            if (condition.run(item))
+                toReturn.add(item);
+        }
+
+        return toReturn;
     }
 
     /**

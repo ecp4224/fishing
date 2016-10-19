@@ -11,6 +11,7 @@ import com.boxtrotstudio.fishing.core.game.animations.AnimationType;
 import com.boxtrotstudio.fishing.core.logic.Logical;
 import com.boxtrotstudio.fishing.core.render.Blend;
 import com.boxtrotstudio.fishing.core.render.Drawable;
+import com.boxtrotstudio.fishing.core.render.Text;
 import com.boxtrotstudio.fishing.handlers.scenes.SpriteScene;
 import com.boxtrotstudio.fishing.utils.Direction;
 import com.boxtrotstudio.fishing.utils.Vector2f;
@@ -40,6 +41,13 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
 
     private boolean isVisible = true;
     private Skin[] skins;
+
+    public static Entity fromTexture(Texture texture) {
+        Sprite sprite = new Sprite(texture);
+        Entity e = new Entity(sprite);
+        e.path = texture.getClass().getCanonicalName();
+        return e;
+    }
 
     public static Entity fromImage(String path) {
         Texture texture = Fishing.ASSETS.get(path, Texture.class);

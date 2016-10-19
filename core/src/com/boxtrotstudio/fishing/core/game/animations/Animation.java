@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.boxtrotstudio.fishing.core.game.Entity;
 import com.boxtrotstudio.fishing.core.game.Skin;
 import com.boxtrotstudio.fishing.utils.Direction;
+import com.boxtrotstudio.fishing.utils.Global;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -12,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Animation {
-    private static final Gson GSON = new Gson();
 
     private AnimationType type;
     private Direction direction;
@@ -39,7 +39,7 @@ public class Animation {
     public static void fromFile(FileHandle file, Entity owner, String skinName) {
         String json = file.readString();
 
-        AnimationFile aniFile = GSON.fromJson(json, AnimationFile.class);
+        AnimationFile aniFile = Global.GSON.fromJson(json, AnimationFile.class);
 
         for (Animation animation : aniFile.animations) {
             animation.init();

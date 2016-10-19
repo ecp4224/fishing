@@ -29,7 +29,7 @@ public class SpriteScene : AbstractScene() {
 
         RayHandler.setGammaCorrection(true)
         RayHandler.isDiffuse = true
-        Fishing.rayHandler.setAmbientLight(0f, 0f, 0f, 0.5f)
+        Fishing.rayHandler.setAmbientLight(1f, 1f, 1f, 1f)
         Fishing.rayHandler.setBlurNum(3)
 
         normalProjection.setToOrtho2D(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat());

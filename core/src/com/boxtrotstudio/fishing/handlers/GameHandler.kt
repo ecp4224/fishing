@@ -22,7 +22,7 @@ class GameHandler() : Handler {
         spriteScene = SpriteScene()
 
         loading.setLoadedCallback(Runnable {
-            Fishing.getInstance().clearScreen()
+            Fishing.getInstance().removeScene(loading)
             Fishing.getInstance().addScene(spriteScene)
         })
 
@@ -41,7 +41,7 @@ class GameHandler() : Handler {
         spriteScene = SpriteScene()
 
         loading.setLoadedCallback(Runnable {
-            Fishing.getInstance().clearScreen()
+            Fishing.getInstance().removeScene(loading)
             Fishing.getInstance().addScene(spriteScene)
         })
 

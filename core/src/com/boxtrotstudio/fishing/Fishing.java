@@ -1,19 +1,15 @@
 package com.boxtrotstudio.fishing;
 
 import box2dLight.RayHandler;
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.boxtrotstudio.fishing.core.game.fishing.Fish;
 import com.boxtrotstudio.fishing.core.game.fishing.FishFactory;
 import com.boxtrotstudio.fishing.core.logic.Handler;
-import com.boxtrotstudio.fishing.handlers.GameHandler;
 import com.boxtrotstudio.fishing.utils.ArrayHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,7 +61,7 @@ public class Fishing {
         });
 
         //Load all sprites
-        FileHandle[] map_files = Gdx.files.internal("maps").list(new FileFilter() {
+        FileHandle[] map_files = Gdx.files.internal("backgrounds").list(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
                 return pathname.getName().endsWith("png") ||

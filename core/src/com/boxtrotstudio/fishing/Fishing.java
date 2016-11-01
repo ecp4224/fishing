@@ -6,6 +6,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.boxtrotstudio.fishing.core.game.fishing.Fish;
 import com.boxtrotstudio.fishing.core.game.fishing.FishFactory;
@@ -109,6 +111,20 @@ public class Fishing {
         }
 
         loaded = true;
+    }
+
+    public static Pixmap getPixmapRoundedRectangle(int width, int height, int radius, Color color) {
+        Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        pixmap.setColor(color);
+
+        pixmap.fillRectangle(0, radius, pixmap.getWidth(), pixmap.getHeight()-2*radius);
+        pixmap.fillRectangle(radius, 0, pixmap.getWidth() - 2*radius, pixmap.getHeight());
+        pixmap.fillCircle(radius, radius, radius);
+        pixmap.fillCircle(radius, pixmap.getHeight()-radius, radius);
+        pixmap.fillCircle(pixmap.getWidth()-radius, radius, radius);
+        pixmap.fillCircle(pixmap.getWidth()-radius, pixmap.getHeight()-radius, radius);
+
+        return pixmap;
     }
 
     public static void setDefaultHandler(Handler defaultHandler) {

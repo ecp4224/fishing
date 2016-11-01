@@ -1,0 +1,9 @@
+{
+  "name": "Test Fish",
+  "texturePath": "fish.png",
+  "skillLevel": 1,
+  "world": 0,
+  "probability": 0.4,
+  "isRare": false,
+  "sellValue": 300
+}

@@ -7,6 +7,7 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.SynchronousAssetLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
+import com.boxtrotstudio.fishing.Fishing;
 import com.boxtrotstudio.fishing.utils.ArrayHelper;
 import com.boxtrotstudio.fishing.utils.Global;
 import com.boxtrotstudio.fishing.utils.PFunction;
@@ -113,6 +114,10 @@ public class FishFactory extends SynchronousAssetLoader<Fish, FishFactory.FishPa
         }
 
         return toReturn;
+    }
+
+    public static Fish pickRandomFish() {
+        return pickRandomFish(Fishing.game.world);
     }
 
     static class FishParameters extends AssetLoaderParameters<Fish> { }

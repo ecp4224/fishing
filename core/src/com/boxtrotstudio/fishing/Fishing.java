@@ -9,7 +9,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.boxtrotstudio.fishing.core.game.fishing.Fish;
 import com.boxtrotstudio.fishing.core.game.fishing.FishFactory;
+import com.boxtrotstudio.fishing.core.game.fishing.Player;
 import com.boxtrotstudio.fishing.core.logic.Handler;
+import com.boxtrotstudio.fishing.handlers.GameHandler;
 import com.boxtrotstudio.fishing.utils.ArrayHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +25,8 @@ public class Fishing {
     private static Handler DEFAULT = new BlankHandler();
     @NotNull
     public static RayHandler rayHandler;
+    public static Player player;
+    public static GameHandler game;
 
     public static FishingClient getInstance() {
         if (INSTANCE == null) {

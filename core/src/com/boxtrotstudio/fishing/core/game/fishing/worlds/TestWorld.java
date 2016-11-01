@@ -1,7 +1,10 @@
 package com.boxtrotstudio.fishing.core.game.fishing.worlds;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.boxtrotstudio.fishing.Fishing;
+import com.boxtrotstudio.fishing.core.game.Entity;
+import com.boxtrotstudio.fishing.core.game.animations.Animation;
 import com.boxtrotstudio.fishing.core.game.entities.Cloud;
 import com.boxtrotstudio.fishing.core.game.fishing.World;
 import com.boxtrotstudio.fishing.handlers.GameHandler;
@@ -29,5 +32,20 @@ public class TestWorld implements World {
 
             handler.spriteScene.addEntity(cloud);
         }
+
+        Entity cat = Entity.fromImage("sprites/cat.png");
+        Animation.fromFile(Gdx.files.internal("sprites/cat.json"), cat);
+        cat.setCenter(200f, 350f);
+        cat.setScale(2f);
+
+        cat.onClick(new Runnable() {
+
+            @Override
+            public void run() {
+                Fishing.game.showShop();
+            }
+        });
+
+        handler.spriteScene.addEntity(cat);
     }
 }

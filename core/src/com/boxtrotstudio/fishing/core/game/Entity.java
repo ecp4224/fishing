@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.boxtrotstudio.fishing.Fishing;
 import com.boxtrotstudio.fishing.core.game.animations.Animation;
 import com.boxtrotstudio.fishing.core.game.animations.AnimationType;
@@ -41,6 +42,9 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
 
     private boolean isVisible = true;
     private Skin[] skins;
+    private Vector2f velocity;
+    private boolean hasGravity;
+    private Runnable onClick;
 
     public static Entity fromTexture(Texture texture) {
         Sprite sprite = new Sprite(texture);
@@ -249,8 +253,30 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
         parents.remove(e);
     }
 
+    private boolean touchDown;
     @Override
     public void tick() {
+        if (onClick != null) {
+            if (Gdx.input.isTouched()) {
+                Vector3 pos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+                pos.x += 80f;
+                Fishing.getInstance().camera.unproject(pos);
+
+                touchDown = contains(pos);
+            } else if (touchDown) {
+                onClick.run();
+                touchDown = false;
+            }
+        }
+
+        if (velocity != null) {
+            if (hasGravity) {
+                velocity.y -= 0.3;
+            }
+
+            setX(getX() + velocity.x);
+            setY(getY() + velocity.y);
+        }
 
         if (isFadingOut) {
             float alpha = ease(1f, 0f, fadeDuration, System.currentTimeMillis() - fadeStart);
@@ -379,14 +405,42 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
             this.animations.add(animation);
         }
 
-        this.animation = this.animations.get(0);
+        setCurrentAnimation(this.animations.get(0));
+    }
+
+    public boolean contains(Vector3 pos) {
+        return contains(pos.x, pos.y);
+    }
+
+    public boolean contains(Vector2f pos) {
+        return contains(pos.x, pos.y);
     }
 
     public boolean contains(float x, float y) {
-        return (x >= getX() && x <= getX() + getWidth() && y >= getY() && y <= getY() + getHeight());
+        return (x >= getX() && x <= getX() + (getWidth() * getScaleX() * 2f) && y >= getY() && y <= getY() + (getHeight() * 2f * getScaleY()));
     }
 
     public void attachSkins(Skin[] skins) {
         this.skins = skins;
+    }
+
+    public void setVelocity(Vector2f velocity) {
+        this.velocity = velocity;
+    }
+
+    public Vector2f getVelocity() {
+        return velocity;
+    }
+
+    public void hasGravity(boolean b) {
+        this.hasGravity = b;
+    }
+
+    public boolean hasGravity() {
+        return hasGravity;
+    }
+
+    public void onClick(Runnable runnable) {
+        this.onClick = runnable;
     }
 }

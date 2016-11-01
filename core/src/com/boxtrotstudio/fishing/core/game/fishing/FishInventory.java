@@ -6,6 +6,7 @@ import java.util.List;
 
 public class FishInventory {
     private HashMap<Fish, FishHolder> fishInventory = new HashMap<>();
+    private long fishCount = 0;
 
     public void addFish(Fish fish) {
         if (fishInventory.containsKey(fish)) {
@@ -14,6 +15,8 @@ public class FishInventory {
             FishHolder holder = new FishHolder(fish);
             fishInventory.put(fish, holder);
         }
+
+        fishCount++;
     }
 
     public List<FishHolder> getInventory() {
@@ -35,11 +38,13 @@ public class FishInventory {
         FishHolder holder = fishInventory.get(fish);
         if (holder.count <= quanity) {
             int sell = (holder.count * fish.getSellValue());
+            fishCount -= holder.count;
             holder.count = 0;
             fishInventory.remove(fish);
             return sell;
         } else {
             holder.count -= quanity;
+            fishCount -= quanity;
         }
 
         return (quanity * fish.getSellValue());
@@ -53,8 +58,13 @@ public class FishInventory {
         }
 
         fishInventory.clear();
+        fishCount = 0;
 
         return sum;
+    }
+
+    public long size() {
+        return fishCount;
     }
 
     public static class FishHolder {

@@ -35,7 +35,7 @@ class BlurredScene(val original: Scene, val radius: Float) : AbstractScene() {
 
         original.init()
 
-        shader = ShaderProgram(Gdx.files.local("shaders/blur.vert"), Gdx.files.local("shaders/blur.frag"))
+        shader = ShaderProgram(Gdx.files.internal("shaders/blur.vert"), Gdx.files.internal("shaders/blur.frag"))
 
         if (shader.log.length !=0)
             System.out.println(shader.log);
@@ -91,9 +91,5 @@ class BlurredScene(val original: Scene, val radius: Float) : AbstractScene() {
     override fun dispose() {
         targetA.dispose()
         targetB.dispose()
-    }
-
-    override fun isVisible() : Boolean {
-        return original.isVisible
     }
 }

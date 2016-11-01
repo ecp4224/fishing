@@ -1,0 +1,19 @@
+{
+	"name": "Cat Shopkeep",
+	"id": "0",
+	"animations": [{
+		"type": "IDLE",
+		"direction": "DOWN",
+		"x": 0,
+		"y": 0,
+		"width": 22,
+		"height": 25,
+		"framecount": 5,
+		"speed": 2
+	}],
+	"skins": [{
+		"name": "DEFAULT",
+		"texture_file": "sprites/cat.png",
+		"variant_name": "DEFAULT"
+	}]
+}

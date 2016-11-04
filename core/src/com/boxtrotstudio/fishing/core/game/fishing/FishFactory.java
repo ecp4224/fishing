@@ -117,7 +117,7 @@ public class FishFactory extends SynchronousAssetLoader<Fish, FishFactory.FishPa
     }
 
     public static Fish pickRandomFish() {
-        return pickRandomFish(Fishing.game.world);
+        return pickRandomFish(Fishing.GAME.world);
     }
 
     static class FishParameters extends AssetLoaderParameters<Fish> { }

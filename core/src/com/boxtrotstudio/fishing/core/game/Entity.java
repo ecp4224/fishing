@@ -2,7 +2,9 @@ package com.boxtrotstudio.fishing.core.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
@@ -12,7 +14,6 @@ import com.boxtrotstudio.fishing.core.game.animations.AnimationType;
 import com.boxtrotstudio.fishing.core.logic.Logical;
 import com.boxtrotstudio.fishing.core.render.Blend;
 import com.boxtrotstudio.fishing.core.render.Drawable;
-import com.boxtrotstudio.fishing.core.render.Text;
 import com.boxtrotstudio.fishing.handlers.scenes.SpriteScene;
 import com.boxtrotstudio.fishing.utils.Direction;
 import com.boxtrotstudio.fishing.utils.Vector2f;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Entity extends Sprite implements Drawable, Logical, Attachable, Comparable<Entity> {
+public class Entity extends Sprite implements Drawable, com.badlogic.gdx.scenes.scene2d.utils.Drawable, Logical, Attachable, Comparable<Entity> {
     private int z;
     private boolean hasLoaded = false;
 
@@ -40,11 +41,21 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
     protected boolean lightable = true;
     private SpriteScene scene;
 
+    private float leftWidth, rightWidth, topHeight, bottomHeight, minWidth, minHeight;
+
     private boolean isVisible = true;
     private Skin[] skins;
     private Vector2f velocity;
     private boolean hasGravity;
     private Runnable onClick;
+    private float rotationVelocity;
+    private float rotationAcceleration;
+
+    private Color targetColor = Color.WHITE;
+    private Color oldColor = Color.WHITE;
+    private long colorStartTime;
+    private long colorFadeDuration;
+    private boolean isEaseColor;
 
     public static Entity fromTexture(Texture texture) {
         Sprite sprite = new Sprite(texture);
@@ -196,36 +207,48 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
 
     @Override
     public void setX(float x) {
-        float dif = getX() - x;
-        super.setX(x);
+        if (children.size() > 0) {
+            float dif = getX() - x;
+            super.setX(x);
 
-        synchronized (child_lock) {
-            for (Attachable c : children) {
-                c.setX(c.getX() - dif);
+            synchronized (child_lock) {
+                for (Attachable c : children) {
+                    c.setX(c.getX() - dif);
+                }
             }
+        } else {
+            super.setX(x);
         }
     }
 
     @Override
     public void setAlpha(float alpha) {
-        super.setAlpha(alpha);
+        if (children.size() > 0) {
+            super.setAlpha(alpha);
 
-        synchronized (child_lock) {
-            for (Attachable c : children) {
-                c.setAlpha(alpha);
+            synchronized (child_lock) {
+                for (Attachable c : children) {
+                    c.setAlpha(alpha);
+                }
             }
+        } else {
+            super.setAlpha(alpha);
         }
     }
 
     @Override
     public void setY(float y) {
-        float dif = getY() - y;
-        super.setY(y);
+        if (children.size() > 0) {
+            float dif = getY() - y;
+            super.setY(y);
 
-        synchronized (child_lock) {
-            for (Attachable c : children) {
-                c.setY(c.getY() - dif);
+            synchronized (child_lock) {
+                for (Attachable c : children) {
+                    c.setY(c.getY() - dif);
+                }
             }
+        } else {
+            super.setY(y);
         }
     }
 
@@ -256,7 +279,7 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
     private boolean touchDown;
     @Override
     public void tick() {
-        if (onClick != null) {
+        if (onClick != null && !Fishing.GAME.getTutorial()) {
             if (Gdx.input.isTouched()) {
                 Vector3 pos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                 pos.x += 80f;
@@ -278,6 +301,13 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
             setY(getY() + velocity.y);
         }
 
+        rotationVelocity += rotationAcceleration;
+        if (getRotation() > 0) {
+            rotate(rotationVelocity);
+        } else if (getRotation() != 0f) {
+            setRotation(0f);
+        }
+
         if (isFadingOut) {
             float alpha = ease(1f, 0f, fadeDuration, System.currentTimeMillis() - fadeStart);
 
@@ -288,6 +318,20 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
                 if (isFadeOutDespawn) {
                     scene.removeEntity(this);
                 }
+            }
+        }
+
+        if (isEaseColor) {
+            float r = ease(oldColor.r, targetColor.r, colorFadeDuration, System.currentTimeMillis() - colorStartTime);
+            float g = ease(oldColor.g, targetColor.g, colorFadeDuration, System.currentTimeMillis() - colorStartTime);
+            float b = ease(oldColor.b, targetColor.b, colorFadeDuration, System.currentTimeMillis() - colorStartTime);
+            float a = ease(oldColor.a, targetColor.a, colorFadeDuration, System.currentTimeMillis() - colorStartTime);
+
+            setColor(new Color(r, g, b, a));
+
+            if (getColor().equals(targetColor)) {
+                isEaseColor = false;
+                targetColor = Color.WHITE;
             }
         }
 
@@ -382,6 +426,18 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
         setSize(this.animation.getWidth(), this.animation.getHeight());
     }
 
+    public void easeToColor(Color target, long duration) {
+        this.isEaseColor = true;
+        this.targetColor = target;
+        this.oldColor = getColor();
+        this.colorFadeDuration = duration;
+        this.colorStartTime = System.currentTimeMillis();
+    }
+
+    public Color getTargetColor() {
+        return targetColor;
+    }
+
     private boolean isFadingOut;
     private boolean isFadeOutDespawn;
     private long fadeDuration;
@@ -442,5 +498,99 @@ public class Entity extends Sprite implements Drawable, Logical, Attachable, Com
 
     public void onClick(Runnable runnable) {
         this.onClick = runnable;
+    }
+
+    @Override
+    public void draw(Batch batch, float x, float y, float width, float height) {
+        float oldx = this.getPosition().x;
+        float oldy = this.getPosition().y;
+        float oldWidth = this.getWidth();
+        float oldHeight = this.getHeight();
+
+        setX(x);
+        setY(y);
+        setSize(width, height);
+
+        super.draw(batch);
+
+        setX(oldx);
+        setY(oldy);
+        setSize(oldWidth, oldHeight);
+    }
+
+    @Override
+    public float getLeftWidth() {
+        return leftWidth;
+    }
+
+    @Override
+    public void setLeftWidth(float leftWidth) {
+        this.leftWidth = leftWidth;
+    }
+
+    @Override
+    public float getRightWidth() {
+        return rightWidth;
+    }
+
+    @Override
+    public void setRightWidth(float rightWidth) {
+        this.rightWidth = rightWidth;
+    }
+
+    @Override
+    public float getTopHeight() {
+        return topHeight;
+    }
+
+    @Override
+    public void setTopHeight(float topHeight) {
+        this.topHeight = topHeight;
+    }
+
+    @Override
+    public float getBottomHeight() {
+        return bottomHeight;
+    }
+
+    @Override
+    public void setBottomHeight(float bottomHeight) {
+        this.bottomHeight = bottomHeight;
+    }
+
+    @Override
+    public float getMinWidth() {
+        return minWidth;
+    }
+
+    @Override
+    public void setMinWidth(float minWidth) {
+        this.minWidth = minWidth;
+    }
+
+    @Override
+    public float getMinHeight() {
+        return minHeight;
+    }
+
+    @Override
+    public void setMinHeight(float minHeight) {
+        this.minHeight = minHeight;
+    }
+
+    public void setRotationVelocity(float rotationVelocity) {
+        this.rotationVelocity = rotationVelocity;
+    }
+
+    public float getRotationVelocity() {
+        return rotationVelocity;
+    }
+
+    public void setRotationAcceleration(float rotationAcceleration) {
+        this.rotationAcceleration = rotationAcceleration;
+    }
+
+    public float getRotationAcceleration() {
+        return rotationAcceleration;
     }
 }

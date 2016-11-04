@@ -1,3 +1,8 @@
+ios/build/*
+ios/robovm-build/*
+html/*
+captures/*
+
 local.properties
 *.mdata
 *.DS_STORE

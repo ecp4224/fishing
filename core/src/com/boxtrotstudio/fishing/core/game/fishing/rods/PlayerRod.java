@@ -3,9 +3,9 @@ package com.boxtrotstudio.fishing.core.game.fishing.rods;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.Vector3;
 import com.boxtrotstudio.fishing.Fishing;
 import com.boxtrotstudio.fishing.core.game.Entity;
+import com.boxtrotstudio.fishing.core.game.entities.Hook;
 import com.boxtrotstudio.fishing.core.game.fishing.Fish;
 import com.boxtrotstudio.fishing.core.game.fishing.FishFactory;
 import com.boxtrotstudio.fishing.core.game.fishing.Rod;
@@ -13,58 +13,110 @@ import com.boxtrotstudio.fishing.core.render.ToastText;
 import com.boxtrotstudio.fishing.utils.Global;
 import com.boxtrotstudio.fishing.utils.Vector2f;
 
-public abstract class PlayerRod extends GestureDetector.GestureAdapter implements Rod {
-    private static final long TIMEOUT = 3000L;
+public class PlayerRod implements Rod {
+    private int nextTapRequirement;
+    private int currentTapCount;
+    private boolean wasPressed;
 
-    /*private long lastCatchTime;
-    private boolean wasPressed;*/
-    private boolean wasCasted;
-    private Entity hook;
+    protected int tapMin = 5, tapMax = 15;
+    protected int catchMin = 1, catchMax = 3;
+    protected double catchCrit = 0.1;
+    protected String name = "Player Rod";
+
     @Override
     public void tick() {
-        /*   if (Gdx.input.isTouched() && !wasPressed) {
-               catchFish();
+        if (Gdx.input.isTouched() && !wasPressed) {
+            currentTapCount++;
 
-               wasPressed = true;
-           } else if (!Gdx.input.isTouched()) wasPressed = false;
+            if (currentTapCount >= nextTapRequirement) {
+                int catchCount = Global.rand(catchMin, catchMax);
+                if (Global.RANDOM.nextDouble() < catchCrit)
+                    catchCount *= 2;
 
-        if (System.currentTimeMillis() - lastCatchTime >= TIMEOUT) {
-            lastCatchTime = System.currentTimeMillis();
+                catchCount *= Fishing.GAME.world.catchMultiplier();
 
-            catchFish();
-        }*/
+                for (int i = 0; i < catchCount; i++) {
+                    catchFish();
+                }
 
 
+                //537.25757 : 238.66669
+                ToastText text = new ToastText(new Vector2f(537f, 238f), "+" + catchCount, 1100f);
+                text.setColor(new Color(90f / 255f, 205f / 255f, 38f / 255f, 1f));
+                text.toast();
+
+                currentTapCount = 0;
+                nextTapRequirement = Global.rand(tapMin, tapMax);
+            }
+
+            wasPressed = true;
+        } else if (!Gdx.input.isTouched()) wasPressed = false;
+
+
+    }
+
+    public int getTapMin() {
+        return tapMin;
+    }
+
+    public void setTapMin(int tapMin) {
+        this.tapMin = tapMin;
+    }
+
+    public int getTapMax() {
+        return tapMax;
+    }
+
+    public void setTapMax(int tapMax) {
+        this.tapMax = tapMax;
+    }
+
+    public int getCatchMin() {
+        return catchMin;
+    }
+
+    public void setCatchMin(int catchMin) {
+        this.catchMin = catchMin;
+    }
+
+    public int getCatchMax() {
+        return catchMax;
+    }
+
+    public void setCatchMax(int catchMax) {
+        this.catchMax = catchMax;
+    }
+
+    public double getCatchCrit() {
+        return catchCrit;
+    }
+
+    public void setCatchCrit(double catchCrit) {
+        this.catchCrit = catchCrit;
     }
 
     @Override
-    public void load() {
-        Fishing.game.inputProcessor.addProcessor(new GestureDetector(this));
-    }
+    public void dispose() { }
 
-    @Override
-    public boolean fling(float velocityX, float velocityY, int button) {
-        if (velocityX > 5 && !wasCasted) {
-            //wasCasted = true;
-
-            hook = Entity.fromImage("sprites/hook.png");
-            hook.setCenter(537f, 400f);
-            hook.setVelocity(new Vector2f(velocityX / 500f, velocityY / 1000f));
-            hook.hasGravity(true);
-            hook.setAlpha(1f);
-            Fishing.game.spriteScene.addEntity(hook);
-        }
-
-        return super.fling(velocityX, velocityY, button);
-    }
-
-    private void catchFish() {
+    protected void catchFish() {
         Fish caughtFish = FishFactory.pickRandomFish();
-        Fishing.player.getFishInventory().addFish(caughtFish);
-
-        //537.25757 : 238.66669
-        ToastText text = new ToastText(new Vector2f(537f, 238f), "+1", 1100f);
-        text.setColor(Color.WHITE);
-        text.toast();
+        Fishing.getPlayer().getFishInventory().addFish(caughtFish);
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String description() {
+        return "It's a rod";
+    }
+
+    @Override
+    public void load() { }
 }

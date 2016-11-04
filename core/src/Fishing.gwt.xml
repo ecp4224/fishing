@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit trunk//EN" "http://google-web-toolkit.googlecode.com/svn/trunk/distro-source/core/src/gwt-module.dtd">
+<module>
+	<source path="com/boxtrotstudio/fishing" />
+	<source path="com/boxtrotstudio/fishing/core" />
+	<source path="com/boxtrotstudio/fishing/core/game" />
+	<source path="com/boxtrotstudio/fishing/core/game/animations" />
+	<source path="com/boxtrotstudio/fishing/core/game/entities" />
+	<source path="com/boxtrotstudio/fishing/core/game/fishing" />
+	<source path="com/boxtrotstudio/fishing/core/game/fishing/rods" />
+	<source path="com/boxtrotstudio/fishing/core/game/fishing/shop" />
+	<source path="com/boxtrotstudio/fishing/core/game/fishing/worlds" />
+	<source path="com/boxtrotstudio/fishing/core/logic" />
+	<source path="com/boxtrotstudio/fishing/core/render" />
+	<source path="com/boxtrotstudio/fishing/core/render/scene" />
+	<source path="com/boxtrotstudio/fishing/handlers" />
+	<source path="com/boxtrotstudio/fishing/handlers/scenes" />
+	<source path="com/boxtrotstudio/fishing/utils" />
+	<source path="com/boxtrotstudio/fishing/utils/annotations" />
+</module>

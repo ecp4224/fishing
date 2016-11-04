@@ -99,8 +99,8 @@ class FishingClient(var handler: Handler) : ApplicationListener {
     }
 
     public fun addScene(scene: Scene) {
-        if (!scenes.contains(scene)) {
-            Gdx.app.postRunnable {
+        Gdx.app.postRunnable {
+            if (!scenes.contains(scene)) {
                 scene.init()
                 scenes.add(scene)
 

@@ -1,3 +1,4 @@
+precision highp float;
 //declare uniforms
 uniform float resolution;
 uniform float radius;

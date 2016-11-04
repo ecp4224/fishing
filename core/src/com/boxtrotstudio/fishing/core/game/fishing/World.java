@@ -9,4 +9,18 @@ public interface World {
     Texture backgroundTexture();
 
     void load(GameHandler handler);
+
+    ShopItem[] buyableItems();
+
+    float catchMultiplier();
+
+    void increaseMultiplierBy(float add);
+
+    void decreaseMultiplierBy(float remove);
+
+    void doubleMultiplier();
+
+    void halfMultiplier();
+
+    void resetMultiplier();
 }

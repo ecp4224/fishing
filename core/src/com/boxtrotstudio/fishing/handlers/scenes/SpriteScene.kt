@@ -118,34 +118,42 @@ public class SpriteScene : AbstractScene() {
     fun updateSprites() {
         dirty = spritesToAdd.size > 0 || spritesToRemove.size > 0
 
-        for (toAdd in spritesToAdd) {
-            val map = if (toAdd.hasLighting()) sprites else uiSprites
+        if (spritesToAdd.size > 0) {
+            for (i in spritesToAdd.indices) {
+                val toAdd = spritesToAdd[i]
 
-            if (map.containsKey(toAdd.blendMode()))
-                map.get(toAdd.blendMode())?.add(toAdd)
-            else {
-                val temp = ArrayList<Drawable>()
-                temp.add(toAdd)
-                map.put(toAdd.blendMode(), temp)
+                val map = if (toAdd.hasLighting()) sprites else uiSprites
+
+                if (map.containsKey(toAdd.blendMode()))
+                    map.get(toAdd.blendMode())?.add(toAdd)
+                else {
+                    val temp = ArrayList<Drawable>()
+                    temp.add(toAdd)
+                    map.put(toAdd.blendMode(), temp)
+                }
             }
+
+            //sprites.addAll(spritesToAdd)
+
+            spritesToAdd.clear()
         }
 
-        //sprites.addAll(spritesToAdd)
+        if (spritesToRemove.size > 0) {
+            for (i in spritesToRemove.indices) {
+                val toRemove = spritesToRemove[i]
 
-        spritesToAdd.clear()
+                if (sprites.containsKey(toRemove.blendMode())) {
+                    sprites.get(toRemove.blendMode())?.remove(toRemove)
+                }
+                if (uiSprites.containsKey(toRemove.blendMode())) {
+                    uiSprites.get(toRemove.blendMode())?.remove(toRemove)
+                }
+            }
 
-        for (toRemove in spritesToRemove) {
-            if (sprites.containsKey(toRemove.blendMode())) {
-                sprites.get(toRemove.blendMode())?.remove(toRemove)
-            }
-            if (uiSprites.containsKey(toRemove.blendMode())) {
-                uiSprites.get(toRemove.blendMode())?.remove(toRemove)
-            }
+            //sprites.removeAll(spritesToRemove)
+
+            spritesToRemove.clear()
         }
-
-        //sprites.removeAll(spritesToRemove)
-
-        spritesToRemove.clear()
     }
 
     public fun sortSprites() {

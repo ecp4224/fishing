@@ -12,23 +12,26 @@ import com.badlogic.gdx.graphics.Texture;
 import com.boxtrotstudio.fishing.core.game.fishing.Fish;
 import com.boxtrotstudio.fishing.core.game.fishing.FishFactory;
 import com.boxtrotstudio.fishing.core.game.fishing.Player;
+import com.boxtrotstudio.fishing.core.game.fishing.SaveState;
 import com.boxtrotstudio.fishing.core.logic.Handler;
 import com.boxtrotstudio.fishing.handlers.GameHandler;
 import com.boxtrotstudio.fishing.utils.ArrayHelper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileFilter;
 
 public class Fishing {
     public static final AssetManager ASSETS = new AssetManager();
+    //public static GDXDialogs DIALOGS;
 
     private static FishingClient INSTANCE;
     private static Handler DEFAULT = new BlankHandler();
     @NotNull
     public static RayHandler rayHandler;
-    public static Player player;
-    public static GameHandler game;
+    public static SaveState CURRENTSAVE;
+    public static GameHandler GAME;
 
     public static FishingClient getInstance() {
         if (INSTANCE == null) {
@@ -41,6 +44,8 @@ public class Fishing {
     public static void loadGameAssets(AssetManager manager) {
         if (loaded)
             return;
+
+        //DIALOGS = GDXDialogsSystem.install();
 
         ASSETS.setLoader(Fish.class, new FishFactory(new InternalFileHandleResolver()));
 
@@ -129,6 +134,18 @@ public class Fishing {
 
     public static void setDefaultHandler(Handler defaultHandler) {
         Fishing.DEFAULT = defaultHandler;
+    }
+
+    @Nullable
+    public static Player getNullablePlayer() {
+        if (CURRENTSAVE == null)
+            return null;
+        return CURRENTSAVE.getPlayer();
+    }
+
+    @NotNull
+    public static Player getPlayer() {
+        return CURRENTSAVE.getPlayer();
     }
 
     private static class BlankHandler implements Handler {

@@ -5,42 +5,56 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FishInventory {
-    private HashMap<Fish, FishHolder> fishInventory = new HashMap<>();
+    private HashMap<String, FishHolder> fishInventory = new HashMap<>();
+    private ArrayList<Fish> fishTypes = new ArrayList<>();
     private long fishCount = 0;
 
     public void addFish(Fish fish) {
-        if (fishInventory.containsKey(fish)) {
-            fishInventory.get(fish).count++;
+        addFish(fish, 1);
+    }
+
+    public void addFish(Fish fish, long amount) {
+        if (fishInventory.containsKey(fish.getName())) {
+            fishInventory.get(fish.getName()).count += amount;
         } else {
             FishHolder holder = new FishHolder(fish);
-            fishInventory.put(fish, holder);
+            holder.count = amount;
+            fishInventory.put(fish.getName(), holder);
+            fishTypes.add(fish);
         }
 
-        fishCount++;
+        fishCount += amount;
     }
 
     public List<FishHolder> getInventory() {
         List<FishHolder> list = new ArrayList<>();
-        for (Fish key : fishInventory.keySet()) {
+        for (String key : fishInventory.keySet()) {
             list.add(fishInventory.get(key));
         }
         return list;
     }
 
-    public int sell(Fish fish) {
+    public long sell(int amount) {
+        if (fishInventory.size() == 0 || fishTypes.size() == 0)
+            return 0;
+        return sell(fishTypes.get(0), amount);
+    }
+
+    public long sell(Fish fish) {
         return sell(fish, 1);
     }
 
-    public int sell(Fish fish, int quanity) {
-        if (!fishInventory.containsKey(fish))
+    public long sell(Fish fish, int quanity) {
+        if (!fishInventory.containsKey(fish.getName()))
             return 0;
 
-        FishHolder holder = fishInventory.get(fish);
+        FishHolder holder = fishInventory.get(fish.getName());
         if (holder.count <= quanity) {
-            int sell = (holder.count * fish.getSellValue());
+            long sell = (holder.count * fish.getSellValue());
             fishCount -= holder.count;
             holder.count = 0;
-            fishInventory.remove(fish);
+            fishInventory.remove(fish.getName());
+            fishTypes.remove(fish);
             return sell;
         } else {
             holder.count -= quanity;
@@ -50,11 +64,38 @@ public class FishInventory {
         return (quanity * fish.getSellValue());
     }
 
-    public int sellAll() {
-        int sum = 0;
-        for (Fish key : fishInventory.keySet()) {
+    public long forceSell(long amount) {
+        long totalSell = 0L;
+        while (amount > 0) {
+            if (fishTypes.size() == 0)
+                break;
+
+            Fish fish = fishTypes.get(0);
+            FishHolder holder = fishInventory.get(fish.getName());
+            if (holder.count <= amount) {
+                long sell = (holder.count * fish.getSellValue());
+                amount -= holder.count;
+                fishCount -= holder.count;
+                holder.count = 0;
+                fishInventory.remove(fish.getName());
+                fishTypes.remove(fish);
+                totalSell += sell;
+            } else {
+                totalSell += (amount * fish.getSellValue());
+                holder.count -= amount;
+                fishCount -= amount;
+                amount = 0;
+            }
+        }
+
+        return totalSell;
+    }
+
+    public long sellAll() {
+        long sum = 0;
+        for (String key : fishInventory.keySet()) {
             FishHolder holder = fishInventory.get(key);
-            sum = sum + (key.getSellValue() * holder.count);
+            sum = sum + (holder.fish.getSellValue() * holder.count);
         }
 
         fishInventory.clear();
@@ -69,7 +110,7 @@ public class FishInventory {
 
     public static class FishHolder {
         private Fish fish;
-        private int count;
+        private long count;
 
         public FishHolder(Fish fish) {
             this.fish = fish;
@@ -80,7 +121,7 @@ public class FishInventory {
             return fish;
         }
 
-        public int getCount() {
+        public long getCount() {
             return count;
         }
     }

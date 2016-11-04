@@ -79,4 +79,10 @@ public abstract class AbstractScene implements Scene {
         scene.setVisible(true);
         setVisible(false);
     }
+
+    protected void reload() {
+        wasInit = false;
+        dispose();
+        init();
+    }
 }

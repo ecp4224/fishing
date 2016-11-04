@@ -7,82 +7,203 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.ui.List
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Array
 import com.boxtrotstudio.fishing.Fishing
 import com.boxtrotstudio.fishing.core.game.Entity
 import com.boxtrotstudio.fishing.core.game.animations.Animation
+import com.boxtrotstudio.fishing.core.render.Text
+import com.boxtrotstudio.fishing.core.render.ToastText
 import com.boxtrotstudio.fishing.core.render.scene.AbstractScene
+import com.boxtrotstudio.fishing.utils.Vector2f
+import de.tomgrill.gdxdialogs.core.dialogs.GDXButtonDialog
+import de.tomgrill.gdxdialogs.core.listener.ButtonClickListener
 
 class ShopScene : AbstractScene() {
-    lateinit var cat: Entity
     lateinit var stage: Stage
-    lateinit var list: List<String>
-    lateinit var dialogBackground: Sprite
-    lateinit var shapeRender: ShapeRenderer
-    val dialogColor = Color(232f/255f,201f/255f,151f/255f,1f)
+    lateinit var scrollPane: ScrollPane
+    private var scrollLocation = 0f
     override fun onInit() {
         stage = Stage(
                 Fishing.getInstance().viewport,
                 Fishing.getInstance().batch
         )
-        Fishing.game.inputProcessor.addProcessor(stage)
+        Fishing.GAME.inputProcessor.addProcessor(stage)
 
         val skin = Skin(Gdx.files.internal("sprites/ui/uiskin.json"))
-        val dialogTexture = Texture(Fishing.getPixmapRoundedRectangle(500, 150, 10, dialogColor))
-        dialogBackground = Sprite(dialogTexture)
-        dialogBackground.setCenter((1280f/2f) + 70, 100f)
+        skin.getFont("light-font").region.texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
 
-        shapeRender = ShapeRenderer()
+        //Construct shop items
+        val table = Table(skin)
 
-        cat = Entity.fromImage("sprites/cat.png")
-        Animation.fromFile(Gdx.files.internal("sprites/cat.json"), cat)
-        cat.scale(14f)
-        cat.setCenter(900f, -35f)
+        for (i in Fishing.GAME.world.buyableItems().indices) {
+            val item = Fishing.GAME.world.buyableItems()[i]
 
-        list = List<String>(skin)
-        list.setItems("Test 1", "Test 2", "Test 3")
+            val itemRow = Table(skin)
+            if (item.image != null) {
+                val image = Image(item.image)
 
-        val scrollPane = ScrollPane(list, skin)
+                if (item.imageWidth != 0f && item.imageHeight != 0f)
+                    itemRow.add(image).width(item.imageWidth).height(item.imageHeight).padRight(15f)
+                else
+                    itemRow.add(image).padRight(15f)
+            }
+
+            val descriptionRow = Table(skin)
+            val title = Label(item.name, skin, "bold")
+            val description = Label(item.description, skin, "light")
+            description.setFontScale(0.8f)
+            description.setWrap(true)
+
+            title.setFontScale(1.3f)
+            descriptionRow.add(title).fill()
+            descriptionRow.row()
+            descriptionRow.add(description).fill().width(370f)
+
+            itemRow.add(descriptionRow).fill().padRight(15f)
+
+            val buttonTable = Table(skin)
+            if (!item.doesOwn()) {
+                val imageButton = ImageButton(TextureRegionDrawable(Entity.fromImage("sprites/buy_up.png")), TextureRegionDrawable(Entity.fromImage("sprites/buy_down.png")))
+
+                imageButton.addListener(object : ClickListener() {
+                    override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                        if (Fishing.getPlayer().actualMoney >= item.cost) {
+                            if (item.isPersistent)
+                                Fishing.getPlayer().recordBuyItem(i)
+
+                            item.onBuy()
+                            Fishing.getPlayer().subtractMoney(item.cost)
+
+                            val text = ToastText(Vector2f(1175f, 50f), "-${item.cost}", 500f)
+                            text.goLeft()
+                            text.color = Color.RED
+                            text.toast(Fishing.GAME.uiSpriteScene)
+
+                            if (item.doesOwn()) {
+                                buttonTable.clear()
+
+                                val text = Label("Already Own", skin, "bold")
+                                text.color = Color.GRAY
+                                text.setAlignment(Align.center)
+                                buttonTable.add(text).fill().padBottom(5f)
+
+                                buttonTable.row()
+
+                                val coinTable = Table(skin)
+
+                                val coinIcon = Image(Texture(Gdx.files.internal("sprites/coin.png")))
+                                val sellLabel = Label("" + item.cost, skin, "bold")
+                                coinTable.add(coinIcon).width(32f).height(32f).padRight(15f)
+                                coinTable.add(sellLabel)
+
+                                buttonTable.add(coinTable).fill()
+                            }
+
+                        } /*else {
+                            val bDialog = Fishing.DIALOGS.newDialog(GDXButtonDialog::class.java)
+                            bDialog.setTitle("Low on Funds!")
+                            bDialog.setMessage("You don't have enough coins for ${item.name}!")
+
+                            bDialog.addButton("Ok")
+
+                            bDialog.build().show()
+                        }*/
+                    }
+                })
+
+                imageButton.setScale(1.3f)
+
+                buttonTable.add(imageButton).fill().padBottom(5f)
+            } else {
+                val text = Label("Already Own", skin, "bold")
+                text.color = Color.GRAY
+                text.setAlignment(Align.center)
+                buttonTable.add(text).fill().padBottom(5f)
+            }
+            buttonTable.row()
+
+            val coinTable = Table(skin)
+
+            val coinIcon = Image(Texture(Gdx.files.internal("sprites/coin.png")))
+            val sellLabel = Label("" + item.cost, skin, "bold")
+            coinTable.add(coinIcon).width(32f).height(32f).padRight(15f)
+            coinTable.add(sellLabel)
+
+            buttonTable.add(coinTable).fill()
+
+            itemRow.add(buttonTable).fill()
+
+            table.add(itemRow).padTop(30f).padRight(25f).padLeft(25f).padBottom(20f)
+            table.row()
+        }
+
+        scrollPane = ScrollPane(table, skin)
         scrollPane.setSmoothScrolling(true)
-        scrollPane.setPosition(1280f / 2f, 720f / 2f)
-        scrollPane.width = 100f
-        scrollPane.height = 100f
+        scrollPane.setScrollingDisabled(true, false)
+        scrollPane.setPosition(1280 / 4f, 220f)
+        scrollPane.width = 700f
+        scrollPane.height = 450f
         scrollPane.isTransform = true
 
-        val dialog = Label("What would you like to buy?", skin)
-        dialog.setPosition((1280f/2f) - 130f, 100f)
-        dialog.color = Color.WHITE
-        dialog.setFontScale(2f)
+        //Construct fish inventory
+        /*val fishTable = Table(skin)
 
-        val dialogShadow = Label("What would you like to buy?", skin)
-        dialogShadow.setPosition(((1280f/2f) - 130f) - 4f, 100f - 4f)
-        dialogShadow.color = Color(0f, 0f, 0f, 0.6f)
-        dialogShadow.setFontScale(2f)
+        for (fishHolder in Fishing.player.fishInventory.inventory) {
+            val itemRow = Table(skin)
+            val fishTexture = Fishing.ASSETS.get<Texture>(fishHolder.fish.texturePath)
+
+            itemRow.add(Image(fishTexture)).width(64f).height(64f).padRight(15f)
+
+            val infoTable = Table(skin)
+            val coinIcon = Image(Texture(Gdx.files.internal("sprites/coin.png")))
+            val sellLabel = Label("" + fishHolder.fish.sellValue, skin, "bold")
+            infoTable.add(coinIcon).width(32f).height(32f).padLeft(32f)
+            infoTable.add(sellLabel)
+            infoTable.row()
+
+            val countLabel = Label("Count: " + fishHolder.count, skin, "light")
+            infoTable.add()
+            infoTable.add(countLabel)
+
+            itemRow.add(infoTable)
+
+            fishTable.add(itemRow).padTop(30f).padRight(25f).padLeft(25f).padBottom(20f)
+            fishTable.row()
+        }
+
+        val scrollPane2 = ScrollPane(fishTable, skin)
+        scrollPane2.setSmoothScrolling(true)
+        scrollPane2.setScrollingDisabled(true, false)
+        scrollPane2.setPosition(900f, 220f)
+        scrollPane2.width = 300f
+        scrollPane2.height = 450f
+        scrollPane2.isTransform = true*/
+
+        val backButton = ImageButton(TextureRegionDrawable(Entity.fromImage("sprites/back_up.png")), TextureRegionDrawable(Entity.fromImage("sprites/back_down.png")))
+        backButton.setPosition(40f, 30f)
+        backButton.addListener(object : ClickListener() {
+            override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                Fishing.GAME.hideShop()
+            }
+        })
+
+        backButton.image.setScale(1.3f)
 
         stage.addActor(scrollPane)
-        stage.addActor(dialogShadow)
-        stage.addActor(dialog)
+        //stage.addActor(scrollPane2)
+        stage.addActor(backButton)
 
         //stage.setDebugAll(true)
     }
 
     override fun render(camera: OrthographicCamera, batch: SpriteBatch) {
-        cat.tick()
-        batch.begin()
-        cat.draw(batch)
-        dialogBackground.draw(batch)
-        batch.end()
-
-        shapeRender.projectionMatrix = camera.combined
-        shapeRender.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRender.triangle(460f, 10f, 480f, 40f, 490f, 30f, dialogColor, dialogColor, dialogColor)
-        shapeRender.end()
-
         stage.act()
         stage.draw()
 
@@ -90,7 +211,7 @@ class ShopScene : AbstractScene() {
     }
 
     override fun dispose() {
-        Fishing.game.inputProcessor.removeProcessor(stage)
+        Fishing.GAME.inputProcessor.removeProcessor(stage)
         stage.dispose()
     }
 

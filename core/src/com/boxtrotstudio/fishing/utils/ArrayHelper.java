@@ -41,6 +41,26 @@ public class ArrayHelper {
         return toReturn;
     }
 
+    public static <T> int indexOf(T obj, List<T> list) {
+        for (int i = 0; i < list.size(); i++) {
+            T item = list.get(i);
+            if (obj.equals(item))
+                return i;
+        }
+
+        return -1;
+    }
+
+    public static <T> int indexOf(T obj, T[] list) {
+        for (int i = 0; i < list.length; i++) {
+            T item = list[i];
+            if (obj.equals(item))
+                return i;
+        }
+
+        return -1;
+    }
+
     /**
      * Execute a function for each item in this array
      * @param collection The array to iterate over

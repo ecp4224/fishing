@@ -24,8 +24,6 @@ public class Cloud extends Entity {
 
     @Override
     public void tick() {
-        super.tick();
-
         setX(getX() + speed);
         if (getX() > 1280 && Global.RANDOM.nextDouble() < 0.8) {
             setX(startX);

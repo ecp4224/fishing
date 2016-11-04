@@ -14,9 +14,11 @@ import com.boxtrotstudio.fishing.core.game.TextEntity;
 import com.boxtrotstudio.fishing.handlers.scenes.SpriteScene;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Text implements Drawable, Attachable {
     private static final Blend TEXT_BLEND = new Blend(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    private static final HashMap<FontCache, BitmapFont> FONT_CACHE = new HashMap<>();
     private final FileHandle handle;
     private final int size;
     private final Color color;
@@ -74,15 +76,23 @@ public class Text implements Drawable, Attachable {
         Gdx.app.postRunnable(new Runnable() {
             @Override
             public void run() {
-                FreeTypeFontGenerator gen = new FreeTypeFontGenerator(handle);
                 FreeTypeFontGenerator.FreeTypeFontParameter parm = new FreeTypeFontGenerator.FreeTypeFontParameter();
                 parm.size = size;
                 parm.color = color;
                 if (characters != null)
                     parm.characters = characters;
 
-                font = gen.generateFont(parm);
-                gen.dispose();
+                FontCache cacheType = new FontCache(parm);
+                if (FONT_CACHE.containsKey(cacheType)) {
+                    font = FONT_CACHE.get(cacheType);
+                } else {
+                    System.out.println("Generate new font!");
+                    FreeTypeFontGenerator gen = new FreeTypeFontGenerator(handle);
+                    font = gen.generateFont(parm);
+                    gen.dispose();
+
+                    FONT_CACHE.put(cacheType, font);
+                }
 
                 layout = new GlyphLayout(font, text);
             }
@@ -91,7 +101,6 @@ public class Text implements Drawable, Attachable {
 
     @Override
     public void unload() {
-        font.dispose();
         text = null;
         font = null;
     }
@@ -217,5 +226,39 @@ public class Text implements Drawable, Attachable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    private static class FontCache {
+        private String characters;
+        private Color color;
+        private int size;
+
+        public FontCache(FreeTypeFontGenerator.FreeTypeFontParameter parameter) {
+            this.characters = parameter.characters;
+            this.color = parameter.color;
+            this.size = parameter.size;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FontCache fontCache = (FontCache) o;
+
+            if (size != fontCache.size) return false;
+            if (characters != null ? !characters.equals(fontCache.characters) : fontCache.characters != null)
+                return false;
+            return color != null ? color.equals(fontCache.color) : fontCache.color == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = characters != null ? characters.hashCode() : 0;
+            result = 31 * result + (color != null ? color.hashCode() : 0);
+            result = 31 * result + size;
+            return result;
+        }
     }
 }
